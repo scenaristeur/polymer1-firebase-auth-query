@@ -1,0 +1,103 @@
+<!-- https://www.youtube.com/watch?v=AAZyQ4Ymkpc -->
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="shared-styles.html">
+
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
+
+<dom-module id="my-view2">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+      #create {
+        width: 100%;
+      }
+      #projets-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      #projets-list li {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      #projets-list .content {
+        @apply(--layout-flex);
+        padding: 8px;
+      }
+      #projets-controls {
+        @apply(--layout-horizontal);
+        @apply(--layout-center-justified);
+      }
+    </style>
+
+    <firebase-auth user="{{user}}"> </firebase-auth>
+
+      <firebase-query
+        id="query"
+        path="/users/[[user.uid]]/projets"
+        data="{{projets}}">
+      </firebase-query>
+
+    <div class="card">
+      <div id="projets">
+          <ul id="projets-list">
+            <template is="dom-repeat" items="[[projets]]" as="projet">
+                <li>
+                  <p class="content">[[projet.content]]</p>
+                  <paper-icon-button icon="clear" projet="[[projet]]" on-tap="remove"></paper-icon-button>
+                </li>
+            </template>
+          </ul>
+          <paper-input id="input" label="Take a note..."></paper-input>
+          <div id="projets-controls">
+            <paper-button id="add" raised on-tap="add">Ajouter</paper-button>
+          </div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'my-view2',
+      properties:{
+        projets:{
+          type: Object
+        }
+      },
+      add: function(){
+          console.log(this.user);
+          console.log(this.$.query.path);
+        this.$.query.ref.push({
+          content: this.$.input.value
+        });
+        this.$.input.value = null;
+      },
+      remove: function(e){
+        var key = e.currentTarget.projet.$key;
+        this.$.query.ref.child(key).remove();
+      }
+    });
+  </script>
+</dom-module>
